@@ -23,7 +23,7 @@
 与当时的一些语言表示模型（如 Peters 的 ELMo 和 Radford 的 GPT）不同，BERT 的设计目标是在所有网络层中同时考虑句子的左侧上下文和右侧上下文，来预训练深层的双向语言表示。而早期模型大多是单向的（只能看左边或右边）。
 
 > 这里来解释一下为什么不同：
-**ELMo（Embeddings from Language Models，2018）**：
+**ELMo（Embeddings from Language Models，2018）**：        
     - 特点：双向 LSTM   
     - 原理： ELMo 使用一个前向（left-to-right）LSTM 和一个后向（right-to-left）LSTM，分别读取句子。
     - 问题： 虽然它是“前向 + 后向”，但这两个方向是分开训练的，不是“同时考虑左右”。    
