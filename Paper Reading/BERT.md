@@ -115,9 +115,9 @@ BERT：是一种改进了传统微调方法的语言预训练模型，使用“�
 1. 避免单向性的限制（核心创新）：使用“掩码语言模型（Masked Language Model, MLM）”来克服传统模型“只能单向理解”的局限。
     - 以前的模型（如 GPT）只能从左往右读；
     - BERT 则通过 MLM 可以在训练时同时看到一个词的左边和右边。
-> MLM 受启发于 Cloze 任务:”…inspired by the Cloze task (Taylor, 1953).”
-“填空题（Cloze test）”：
-&emsp;给你一句话，遮掉某个词，让你根据上下文来猜这个词。
+> MLM 受启发于 Cloze 任务:”…inspired by the Cloze task (Taylor, 1953).”               
+“填空题（Cloze test）”：            
+&emsp;给你一句话，遮掉某个词，让你根据上下文来猜这个词。          
 &emsp;这就是 BERT 的预训练核心目标。
 
 2. MLM 是怎么工作的？
