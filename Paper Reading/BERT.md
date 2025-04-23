@@ -24,22 +24,22 @@
 
 > 这里来解释一下为什么不同：
 **ELMo（Embeddings from Language Models，2018）**：
-    - 特点：双向 LSTM
+    - 特点：双向 LSTM   
     - 原理： ELMo 使用一个前向（left-to-right）LSTM 和一个后向（right-to-left）LSTM，分别读取句子。
-    - 问题： 虽然它是“前向 + 后向”，但这两个方向是分开训练的，不是“同时考虑左右”。
-    - 层级处理： 它的双向性不是在每一层都共同作用，而是最后将两个方向的输出拼接起来。
-所以，ELMo 是“浅层双向”而不是 BERT 那种“深层双向”。
+    - 问题： 虽然它是“前向 + 后向”，但这两个方向是分开训练的，不是“同时考虑左右”。    
+    - 层级处理： 它的双向性不是在每一层都共同作用，而是最后将两个方向的输出拼接起来。      
+所以，ELMo 是“浅层双向”而不是 BERT 那种“深层双向”。       
 **GPT（Generative Pre-trained Transformer，2018）**：
-    - 特点：单向 Transformer（只看左边）
-    - 原理： GPT 使用标准的 Transformer decoder 架构，在训练时只看每个词的左边上下文（即过去的词）。
-    - 限制： 模型在预测一个词时，不能看到右边，否则就不是“自回归语言建模”了。
-所以 GPT 是“严格单向”，只有“从左到右”的信息流。
-**BERT（Bidirectional Encoder Representations from Transformers，2018）**：
-    - 特点：真正的“深层双向”Transformer
-    - 原理： BERT 使用 Transformer encoder，训练时通过 Masked Language Modeling（MLM），随机遮掉句中的部分词，然后让模型根据上下文去预测它。
-    - 优势： 因为每个被遮住的词周围的词都可以来自左边和右边，所以 BERT 在每一层都同时考虑左、右上下文。
-BERT 是“jointly conditioning on both left and right context in all layers”，这是它和 ELMo/GPT 最大的区别。
-> > 这里我对这个优势的理解是：它能够在模型的每一层中，同时利用一个词的左边和右边的信息（上下文）来理解这个词的含义。
+    - 特点：单向 Transformer（只看左边）            
+    - 原理： GPT 使用标准的 Transformer decoder 架构，在训练时只看每个词的左边上下文（即过去的词）。          
+    - 限制： 模型在预测一个词时，不能看到右边，否则就不是“自回归语言建模”了。             
+所以 GPT 是“严格单向”，只有“从左到右”的信息流。         
+**BERT（Bidirectional Encoder Representations from Transformers，2018）**：         
+    - 特点：真正的“深层双向”Transformer           
+    - 原理： BERT 使用 Transformer encoder，训练时通过 Masked Language Modeling（MLM），随机遮掉句中的部分词，然后让模型根据上下文去预测它。               
+    - 优势： 因为每个被遮住的词周围的词都可以来自左边和右边，所以 BERT 在每一层都同时考虑左、右上下文。             
+BERT 是“jointly conditioning on both left and right context in all layers”，这是它和 ELMo/GPT 最大的区别。             
+> > 这里我对这个优势的理解是：它能够在模型的每一层中，同时利用一个词的左边和右边的信息（上下文）来理解这个词的含义。             
 
 
 因此，BERT 预训练模型只需要在其上面添加一个任务相关的输出层，然后进行微调（fine-tuning），就可以在各种 NLP 任务（如问答、语言推理等）上获得非常好的效果，而不需要对整个模型结构做复杂的任务专属改动。
