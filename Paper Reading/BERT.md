@@ -148,12 +148,252 @@ BERT：是一种改进了传统微调方法的语言预训练模型，使用“�
 
 本小节重点介绍了 BERT 出现之前已有的 **无监督特征提取型预训练方法（feature-based approaches）** 的 **Related Work（相关工作）**。
 
-1. 首先是词表示的演变：
+1. 首先是词表示的演变
+
 长期以来，自然语言处理（NLP）领域一直在研究如何学习通用的词表示（word representations）。
 这些方法包括：
-    - 非神经网络方法：如 Brown clustering（Brown et al., 1992）
-    - 神经网络方法：如：
-        - Word2Vec（Mikolov et al., 2013）
-        - GloVe（Pennington et al., 2014）
+- 非神经网络方法：如 Brown clustering（Brown et al., 1992）
+- 神经网络方法：如：
+    - ord2Vec（Mikolov et al., 2013）
+    - GloVe（Pennington et al., 2014）
 
 这些模型产生了“词嵌入向量（word embeddings）”，是现代 NLP 系统的重要组成部分，能比从零训练的表示效果好很多（Turian et al., 2010）。
+
+2. 词向量如何预训练
+
+为了训练这些词向量，研究者使用了许多不同的目标函数（objectives），包括：
+- 左到右语言模型目标（如 Mnih and Hinton, 2009）：给定前面的词预测下一个；
+- 区分正确/错误词的上下文目标（如 Mikolov et al., 2013）：Skip-gram 模型，用上下文来预测中心词，或反过来。
+
+这些目标都是“无监督的”，依赖于大规模文本，而不需要人工标注。
+
+3. 从词到句的表示发展
+
+随着研究的进展，人们开始从“词”向“句子”甚至“段落”级别的表示发展，比如：
+- 句子嵌入（Kiros et al., 2015；Logeswaran and Lee, 2018）
+- 段落嵌入（Le and Mikolov, 2014）          
+
+这些研究提出了一些训练目标，例如：
+- 选句子的排序任务（Jernite et al., 2017）
+- 左到右生成下一句（Kiros et al., 2015）
+- 去噪自编码器（denoising autoencoder） 目标（Hill et al., 2016）
+
+所有这些目标都是为了让模型学会句子或段落的通用表示。
+
+4. ELMo 的贡献与特点
+
+ELMo 是在传统词嵌入基础上进行的重要扩展。它的特点是：
+- 上下文相关表示：同一个词在不同上下文中有不同表示；
+- 使用的是一个 从左到右 + 从右到左的语言模型（双向 LSTM）；
+- 每个词的最终表示是左右两个方向的拼接（不是融合）。
+
+所以说 ELMo 是 feature-based、浅层双向，不是深层双向（如 BERT）。
+> ELMo 的用法是把它生成的向量加到原来的任务模型里当“额外特征”用。它在很多任务中都带来了提升，例如：
+	•	问答（Rajpurkar et al., 2016）
+	•	情感分析（Socher et al., 2013）
+	•	命名实体识别（Tjong Kim Sang and De Meulder, 2003）
+
+5. 与 ELMo 类似的其他方法
+
+这里提到了一个与 ELMo 类似的模型（Melamud et al., 2016）：
+- 使用 LSTM 来同时看左右上下文；
+- 目标是根据上下文预测某个词。
+
+这与后来的 MLM 思想有些接近，但它也属于浅层拼接，没有深层融合。
+
+6. 此外还提到 Cloze 任务（即填空题）可以用来提高文本生成模型的健壮性。
+
+## 2.2 Unsupervised Fine-tuning Approaches（无监督微调方法）
+
+1. 早期方法只是预训练词向量
+
+和 feature-based 方法一样，最早的无监督微调方法其实也只是从无标注文本中学习词向量参数而已。
+- 比如 Collobert 和 Weston（2008）是较早的尝试；
+- 他们的方法并不是训练完整的上下文模型，而是预训练词嵌入（embedding）后用于下游任务。
+
+2. 最近的主流是预训练整个句子/文档编码器
+
+近几年，研究者开始预训练能输出上下文相关词表示的句子编码器或文档编码器。这类模型的流程是：
+&emsp;&emsp;&emsp;1. 在大规模无标注文本上做预训练；
+&emsp;&emsp;&emsp;2. 然后将整个模型用于下游任务并进行微调（fine-tune）。
+
+其中包括：
+- Dai & Le (2015)：对 LSTM 进行语言建模预训练并迁移；
+- Howard & Ruder (2018)：提出 ULMFiT，在语言模型基础上进行微调；
+- Radford et al. (2018)：就是 GPT 模型。
+
+3. 这类方法的主要优点
+
+这类微调方法的一个明显优势是：
+
+- 在处理下游任务时，只需学习很少的新参数，因为预训练模型已经学到了大量通用的语言知识。
+
+相比起 feature-based 方法里每次都要单独设计结构，这种方式更简洁高效。
+
+4. 成功案例：GPT
+
+GPT 就是这种方法的一个代表性成功案例：
+- 使用左到右的语言模型目标做预训练；
+- 然后在下游任务上进行 fine-tune；
+- 成功刷新了多个句子级任务的最好表现（基准是 GLUE 任务集）。
+
+5. 总结
+
+说明“无监督微调方法”所采用的预训练目标函数主要是：
+- 单向语言建模（GPT、ULMFiT）
+- 自编码器型重建（Dai and Le）
+
+为接下来介绍 BERT 的创新点（使用双向 MLM 来做深层预训练）做铺垫。
+
+## 2.3 Transfer Learning from Supervised Data
+
+本段阐述了从有大规模标注数据的监督任务中学习到的模型，也可以迁移到其他任务中，效果很好。无论书NLP还是CV领域都已经有很成功的例子。
+1. NLP：
+- 自然语言推理（NLI）：Conneau 等人（2017）提出了 InferSent —— 在大规模 NLI 数据集（如 SNLI）上训练句子编码器，然后迁移到其他任务；
+- 机器翻译（MT）：McCann 等人（2017）提出了 CoVe —— 在机器翻译任务中训练 LSTM 编码器，然后用于其他下游任务。
+
+2. CV：
+- Deng et al., 2009：ImageNet 数据集的原始论文；
+- Yosinski et al., 2014：探讨了迁移深度特征表示的有效性。
+
+为后文介绍BERT提供更大视角背景：BERT是**无监督迁移学习**，但与**监督迁移学习**一样强大，甚至更灵活。
+
+# 3 BERT
+
+本节主要介绍了下面几个部分：
+1. BERT 的训练流程（预训练 + 微调）
+2. BERT 的架构（基于 Transformer）
+3. BERT 模型的两个版本（Base 和 Large）
+4. 与 GPT 的架构对比（双向 vs 单向 self-attention）
+
+BERT 的训练流程分为两个阶段：
+- 预训练（pre-training）：
+    - 使用大量的无标注文本数据（如 Wikipedia、BookCorpus）；
+    - 目标是让模型学到通用的语言知识；
+- 微调（fine-tuning）：
+    - 在具体任务上，用有标签的数据对模型进行调整；
+    - 每个下游任务（如问答、文本分类等）都单独训练一个版本。
+
+每个任务用的是同一个预训练模型的参数初始化，然后再微调（这就是迁移学习的精髓）。
+
+![Figure 1](../images/BERT_Figure_1.png)
+Figure 1：该图展示了整个 BERT 模型的预训练（Pre-training）与微调（Fine-tuning）流程：
+- 左边：BERT 的 预训练阶段（Pre-training）
+- 右边：BERT 在不同任务上的 微调阶段（Fine-tuning）
+
+一、左侧：Pre-training（预训练）
+
+核心思想：
+- BERT 在大规模语料上通过两个任务来进行预训练：
+- Masked Language Model（MLM）
+- Next Sentence Prediction（NSP）
+
+输入形式：
+- 输入的是两个句子（Sentence A 和 Sentence B）
+- BERT 使用 [CLS] 作为整个句子的起始标志，[SEP] 作为句子之间的分隔符。
+- 每个 token（Tok）都会被编码成三种信息的融合：
+    - Token Embedding（词嵌入）
+    - Segment Embedding（句子A or B）
+    - Position Embedding（词在句子中的位置）
+> 对[CLS]有疑问可以问问GPT或者看看同目录下的 **`BERT_CLS.md`**（虽然也是问GPT），解释的很清楚。
+
+预训练任务详解：
+
+1. Masked Language Model（MLM）
+    - 随机遮盖输入中的一些 token，例如把 “I love this [MASK]”。
+    - 模型的任务是预测被遮住的 token。
+    - 这是**双向语言模型**的体现（BERT 最大创新）：可以利用上下文两边的信息。
+
+图中红色箭头 “Mask LM” 就是这个任务，表示模型预测被 mask 的位置。
+
+2. Next Sentence Prediction（NSP）
+    - 模型还需要判断：句子 B 是否真的是句子 A 的下一句？
+    - 一半的训练样本是真实的句子对，另一半是随机配对。
+
+图中红色箭头 “NSP” 就是这个任务的输出。
+
+
+二、右侧：Fine-tuning（微调）
+
+**核心思想**：在不同的下游任务中，在 BERT 的预训练模型基础上，加一个轻量的任务特定层（如分类器、指针等），然后对整个模型一起训练（微调）。
+
+图中展示了三个任务：
+
+1. MNLI（自然语言推理）/NER（命名实体识别）
+    - 输入：两个句子
+    - 目标：判断关系/抽取实体
+    - 输出形式：分类标签（如 entailment / contradiction）或序列标签（如 PER, LOC）
+
+使用 [CLS] 向量进行分类。
+
+2. SQuAD（问答任务）
+    - 输入：问题 + 段落
+    - 目标：找出答案在段落中的起始位置和结束位置
+    - 输出：Start 和 End 的 token 位置（两个 softmax）
+
+图中红色箭头“Start/End Span”表示要预测答案起始和结束的 token。
+
+微调期间的特点：
+- 输入格式和预训练一样：[CLS] Sentence A [SEP] Sentence B [SEP]
+- 微调时：
+    - 模型的所有参数都会更新
+    - 但结构不变，只是加入一个 task-specific 的输出层
+
+看完图片我们继续回到正文。
+
+BERT 一个显著的特点是：不同任务之间不需要改模型结构！
+只需要：
+- 用同一个 Transformer 编码器结构；
+- 加一个任务相关的输出层（如分类器）；
+- 然后微调整个模型。
+
+对比之前的方法（如 ELMo 需要定制结构），这大大简化了流程。
+
+BERT 的核心结构是基于 Vaswani 等人提出的 Transformer Encoder：
+- 是一个多层（multi-layer）的编码器；
+- 支持深层双向 self-attention，也就是：
+- 每个词可以同时看左边和右边的词；
+- 不像 GPT 只能看左边。
+
+> 作者说实现几乎和原始的 Transformer 一样（参考 Vaswani et al., 2017），所以不再赘述。这里引用了一个质量非常高的Transformer教学文章：[The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)很推荐看。
+
+BERT 有两个主版本（都是 encoder-only）：
+| 名称 | 层数L | 隐藏维度H | Attention头数A | 参数量 |
+| :--- | :---: | ---: | ---: | ---: |
+|BERT~BASE~|12|768|12|110M|
+|BERT~BASE~|24|1024|16|340M|
+
+BERT~BASE~在很多任务上效果远超 GPT。
+> 我认为看看就好
+
+接下来是BERT 的输入和输出表示（Input/Output Representations）
+
+为了让 BERT 能支持多种下游任务（如问答、分类、推理等），模型的输入设计要能明确地表示：
+- 单个句子
+- 或者一对句子（例如问题和答案）
+
+而且这些句子都必须能表示为一个统一的 token 序列，送进模型。
+“句子”其实可以泛指一段连续的文本，不一定是语法意义上的完整句子。
+
+BERT 使用的是 WordPiece 分词方法（Google 提出的子词单元方法），词表大小为 30,000。对输入句子进行分词后，会得到一系列 token，每个 token 被转换成向量。
+
+对于输入的句子对会被合并成一个输入序列，区分句子、明确它们各自的边界和归属的方法有两种：
+1. 用 [SEP] 标记分割两个句子
+2. 给每个 token 加一个 segment embedding（表示它是属于句子A还是句子B）
+
+**Token**的表示由三部分组成（如下图Figure2所示）：
+- 每个 token 的最终输入向量 = 词嵌入（Token Embedding） +  句子嵌入（Segment Embedding） +  位置编码（Position Embedding）
+![Figure 1](../images/BERT_Figure_2.png)
+
+## 3.1 Pre-training BERT
+
+与 ELMo（Peters et al., 2018a） 和 GPT（Radford et al., 2018） 不同，BERT 没有使用传统的单向语言模型来进行预训练，而是实现了“真正的双向建模”。
+
+BERT 的预训练采用了两种无监督任务（详细介绍）：
+1. Masked Language Model（MLM）
+2. Next Sentence Prediction（NSP）
+
+这两个任务共同训练出 BERT 的深层双向语言理解能力（Figure 1左边部分可以看到这两个任务的结构可视化，其实前面讲这个图的时候已经讲过了）
+
+
+
