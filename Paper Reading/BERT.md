@@ -385,6 +385,14 @@ BERT 使用的是 WordPiece 分词方法（Google 提出的子词单元方法）
 - 每个 token 的最终输入向量 = 词嵌入（Token Embedding） +  句子嵌入（Segment Embedding） +  位置编码（Position Embedding）
 ![Figure 1](../images/BERT_Figure_2.png)
 
+| 成分                          | 是否学习                     | 含义                         |
+|-----------------------------|----------------------------|----------------------------|
+| Token Embedding（词嵌入）       | 学习得来                  | 每个词的基本向量表示             |
+| Segment Embedding（句子类型）   | 学习得来                  | 句子 A (0) vs 句子 B (1)     |
+| Position Embedding（位置编码） | 学习得来（在 BERT 中是可学习的位置编码） | 词在句子中的位置信息           |
+
+无论你是属于句子A还是B，也无论你是在第几位（第1个词、第5个词、第100个词），BERT都会给你分配一个可以学习的向量，作为你输入表示的一部分。
+
 ## 3.1 Pre-training BERT
 
 与 ELMo（Peters et al., 2018a） 和 GPT（Radford et al., 2018） 不同，BERT 没有使用传统的单向语言模型来进行预训练，而是实现了“真正的双向建模”。
