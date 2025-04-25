@@ -6,3 +6,4 @@ Pathways to Computer Science learning(Maybe DL).
 ### Been completed： 
 2. Paper Reading:
     - BERT
+    - ViT
