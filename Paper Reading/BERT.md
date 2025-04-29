@@ -382,9 +382,9 @@ BERT 使用的是 WordPiece 分词方法（Google 提出的子词单元方法）
 2. 给每个 token 加一个 segment embedding（表示它是属于句子A还是句子B）
 
 **Token**的表示由三部分组成（如下图Figure2所示）：
-- 每个 token 的最终输入向量 = 词嵌入（Token Embedding） +  句子嵌入（Segment Embedding） +  位置编码（Position Embedding）
-![Figure 1](../images/BERT_Figure_2.png)
-
+- 每个 token 的最终输入向量 = 词嵌入（Token Embedding） +  句子嵌入（Segment Embedding） +  位置编码（Position Embedding）       
+![Figure 1](../images/BERT_Figure_2.png)       
+        
 | 成分                          | 是否学习                     | 含义                         |
 |-----------------------------|----------------------------|----------------------------|
 | Token Embedding（词嵌入）       | 学习得来                  | 每个词的基本向量表示             |
