@@ -274,9 +274,10 @@ BERT 的训练流程分为两个阶段：
     - 在具体任务上，用有标签的数据对模型进行调整；
     - 每个下游任务（如问答、文本分类等）都单独训练一个版本。
 
-每个任务用的是同一个预训练模型的参数初始化，然后再微调（这就是迁移学习的精髓）。
+每个任务用的是同一个预训练模型的参数初始化，然后再微调（这就是迁移学习的精髓）。        
 
-![Figure 1](../images/BERT_Figure_1.png)              
+![Figure 1](../images/BERT_Figure_1.png)        
+      
 Figure 1：该图展示了整个 BERT 模型的预训练（Pre-training）与微调（Fine-tuning）流程：         
 - 左边：BERT 的 预训练阶段（Pre-training）
 - 右边：BERT 在不同任务上的 微调阶段（Fine-tuning）
@@ -383,7 +384,8 @@ BERT 使用的是 WordPiece 分词方法（Google 提出的子词单元方法）
 
 **Token**的表示由三部分组成（如下图Figure2所示）：
 - 每个 token 的最终输入向量 = 词嵌入（Token Embedding） +  句子嵌入（Segment Embedding） +  位置编码（Position Embedding）       
-![Figure 1](../images/BERT_Figure_2.png)       
+
+![Figure 2](../images/BERT_Figure_2.png)       
         
 | 成分                          | 是否学习                     | 含义                         |
 |-----------------------------|----------------------------|----------------------------|
