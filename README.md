@@ -7,6 +7,7 @@ Pathways to Computer Science learning(Maybe DL).
 2. Paper Reading:
     - BERT
     - ViT
+    - Transformer
 
 # 说明    
 
