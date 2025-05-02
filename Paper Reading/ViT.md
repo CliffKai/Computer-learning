@@ -271,7 +271,7 @@ $$
 \text{FinalOutput} = \text{AttentionOutput} + \text{MLPOutput}
 $$
 
-**10. 重复上述 4 - 9 步，堆叠 L 层 **
+**10. 重复上述 4 - 9 步，堆叠 L 层**
 
 **11.取出 [CLS] Token 用于分类**
 - [CLS] 位置的向量经过 L 层处理后，包含了全图的全局特征信息；
