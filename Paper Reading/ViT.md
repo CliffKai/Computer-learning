@@ -179,10 +179,12 @@ Figure 1 是 ViT 的结构总览图，下面来详细了解一下 ViT 在使用 
 
 **1. 划分 Patch + 线性映射**
 
-假设我们有一张 *H × W × C* 的图片，而后将图片划分为固定大小的 Patch ，每张 Patch 大小为 P^2^ ，所以 *H × W* 的图片会被分为：
+假设我们有一张 *H × W × C* 的图片，而后将图片划分为固定大小的 Patch ，每张 Patch 大小为 P^2^ ，所以 *H × W* 的图片会被分为：          
+
 $$
 N = \frac{H \times W}{P \times P}
 $$
+
 个小Patch，每个小Patch为 *P × P × C*，通过 **Linear Projection of Flattened Patches** 模块将每个小Patch展平为 *P^2^ * C* 大小的向量。
 
 e.g: 
