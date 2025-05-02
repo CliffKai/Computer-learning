@@ -318,7 +318,7 @@ $$
 - 新的分类头初始化为零，并将在微调中重新训练。
 
 微调阶段如果使用更高分辨率的图像输入（例如预训练用 224×224，微调时用 384×384）常常会提升性能（参考 Touvron et al., 2019；Kolesnikov et al., 2020），因为更高分辨率意味着图像被分成更多 patch，因此输入序列长度 N 会变长，模型能获取更多细节信息。    
-但是原本训练好的 **1D位置编码（positional embedding）**是针对预训练时固定数量的 patch 学到的，如果微调时使用更大的图像，patch 数 N 会变大，那么原始的位置编码长度就对不上了。       
+但是原本训练好的 **1D位置编码（positional embedding）** 是针对预训练时固定数量的 patch 学到的，如果微调时使用更大的图像，patch 数 N 会变大，那么原始的位置编码长度就对不上了。       
 解决方法是：对预训练好的位置编码进行二维插值（2D interpolation），使其适应新图像的 patch 数。
 方法如下：
 1.	把原来的 196 个 patch 位置编码（196 * D） reshape 成 14 * 14 * D
@@ -326,4 +326,132 @@ $$
 3.	reshape 成新的 576 * D 位置编码    
 
 因为位置编码学到的是相对空间中的含义，右上、左上、中间等等，所以该方法不会改变模型学到的相对空间信息。
+
+# 4 EXPERIMENTS
+
+作者的实验对象有三种模型：
+1.	ResNet：传统卷积神经网络（CNN）代表；
+2.	Vision Transformer (ViT)；
+3.	Hybrid：混合模型，把 CNN 和 Transformer 结合起来（如先用 CNN 提取特征，再用 Transformer 编码）。  
+
+研究重点：不同模型的数据需求差异。
+方法：使用不同大小的数据集（小、中、大）进行预训练，然后在多个标准任务上评估模型效果。
+> 这是为了回答：ViT 是否比 ResNet 更依赖大数据？小数据下表现怎样？两个问题    
+
+实验结果：
+- ViT 不仅效果好，而且在计算成本（pre-training cost）方面也很有优势。
+- 在大多数图像识别任务上（benchmark），ViT 达到最先进水平（state-of-the-art）。
+- 上述结果是在更低预训练成本下获得的，说明 ViT 性能/成本比高。   
+
+同时作者还做了一个额外实验：用自监督学习（self-supervised learning）训练 ViT，虽然只是小规模实验，但结果初步说明ViT 在自监督框架下也具有很大潜力，这为未来进一步研究提供了一个可能方向。
+
+
+| Model     | Layers | Hidden size *D* | MLP size | Heads | Params |
+|-----------|--------|------------------|----------|--------|--------|
+| ViT-Base  | 12     | 768              | 3072     | 12     | 86M    |
+| ViT-Large | 24     | 1024             | 4096     | 16     | 307M   |
+| ViT-Huge  | 32     | 1280             | 5120     | 16     | 632M   |
+
+**Table 1**: Details of Vision Transformer model variants.   
+
+ViT 模型结构的不同配置：
+| 字段           | 含义 |
+|----------------|------|
+| **Layers**     | Transformer 的层数（即堆叠的 Transformer 编码器数量） |
+| **Hidden size D** | 每个 token 表示向量的维度，也叫 “Transformer embedding size” |
+| **MLP size**   | 每个 Transformer Block 中 MLP 的隐藏层大小（通常是 Hidden size 的 4 倍） |
+| **Heads**      | 多头注意力的头数 |
+| **Params**     | 模型总参数量，越大表示模型容量越强，但也更难训练 |     
+
+## 4.1 SETUP    
+本段详细说明了作者的实验设计：使用了哪些数据集、模型、训练策略和评估指标。
+
+一、Datasets（数据集）
+
+为了探索模型在不同数据规模下的表现，作者使用了多个规模递增的数据集进行预训练：
+
+1. ImageNet (1k)：ILSVRC-2012，有 1000 类，约 130 万张图像。
+2. -21k：ImageNet 的扩展版本，有 21,000 个类，约 1400 万张图像。
+3. JFT-300M：谷歌内部大规模数据集，有 18,000 个类和 3.03 亿张高分辨率图像。
+
+所有训练集都进行了与测试集的去重（de-duplicate），以避免泄漏（参考 Kolesnikov et al., 2020）。
+
+微调（fine-tune）时在多个下游任务上评估性能，包括：
+- ImageNet（使用官方验证标签和 Real 标签）
+- CIFAR-10/100
+- Oxford-IIIT Pets
+- Oxford Flowers-102
+
+这些数据集都使用相同的预处理方法。
+
+
+还评估了 VTAB（Visual Task Adaptation Benchmark），包括19个任务（Zhai et al., 2019）：
+
+- 每个任务只使用 1000 个样本进行微调，强调小样本泛化能力。
+- 分为三类任务：
+	    1.	Natural：常规自然图像（如 CIFAR、Pets 等）
+	    2.	Specialized：专业任务，如医学、卫星图像
+	    3.	Structured：结构化理解任务，如定位
+
+⸻
+
+🏗️ 二、Model Variants（模型变体）
+
+ViT 模型基于 BERT 配置（Devlin et al., 2019），包括：
+
+- ViT-Base（BERT-Base 相同配置）
+- ViT-Large（BERT-Large 相同配置）
+- ViT-Huge（更大版本）
+
+模型命名中包含 patch 大小。例如：
+
+- ViT-L/16 表示 Large 版本，patch size 为 16×16。
+- patch 越小，序列长度越长，计算成本越高（注意力机制是平方复杂度）。
+
+⸻
+
+CNN 基线模型：
+
+- 使用 ResNet（He et al., 2016），但做了一些改进：
+- BatchNorm 替换为 GroupNorm（Wu & He, 2018）
+- 使用 标准化卷积核（standardized convs）（Qiao et al., 2019）
+- 形成改良版 ResNet，称为 BiT（Big Transfer）（Kolesnikov et al., 2020）
+
+混合模型：
+
+- 使用 CNN 特征图（feature maps）作为 Transformer 的输入。
+- Patch size 是 1×1，相当于把 feature map 每个像素都看成一个 patch。
+
+⸻
+
+🛠️ 三、Training & Fine-tuning（训练与微调）
+
+所有模型（包括 ResNet 和 ViT）都使用 Adam 优化器 进行预训练：
+
+- β₁ = 0.9，β₂ = 0.999，weight decay = 0.1
+- batch size = 4096
+- 采用 linear learning rate warmup 和 decay 策略
+- 作者发现：Adam 比 SGD 更适合他们的设置
+
+微调阶段使用 SGD + momentum：
+
+- batch size = 512
+- ImageNet 微调：
+- ViT-L/16 用 batch size 512
+- ViT-H/14 用 batch size 518
+- 使用 Polyak Averaging 提升效果（Ramachandran et al., 2019）
+
+⸻
+
+🎯 四、Metrics（评估指标）
+
+作者主要评估两种设置下的准确率：
+
+	1.	Fine-tuning accuracy：在下游任务上微调后的准确率
+	2.	Few-shot accuracy：不微调，直接用预训练模型提取的表示去做分类
+
+Few-shot 的方法是：
+
+- 使用正则化的最小二乘回归，从训练样本的表示映射到类别标签（如 {-1, 1}^K）
+- 这种设置可以闭式求解，快速评估表示能力
 
