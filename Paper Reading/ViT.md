@@ -366,7 +366,7 @@ ViT 模型结构的不同配置：
 ## 4.1 SETUP    
 本段详细说明了作者的实验设计：使用了哪些数据集、模型、训练策略和评估指标。
 
-一、Datasets（数据集）
+**一、Datasets**
 
 为了探索模型在不同数据规模下的表现，作者使用了多个规模递增的数据集进行预训练：
 
@@ -393,9 +393,8 @@ ViT 模型结构的不同配置：
 	    2.	Specialized：专业任务，如医学、卫星图像
 	    3.	Structured：结构化理解任务，如定位
 
-⸻
 
-🏗️ 二、Model Variants（模型变体）
+**二、Model Variants（模型变体）**
 
 ViT 模型基于 BERT 配置（Devlin et al., 2019），包括：
 
@@ -408,7 +407,6 @@ ViT 模型基于 BERT 配置（Devlin et al., 2019），包括：
 - ViT-L/16 表示 Large 版本，patch size 为 16×16。
 - patch 越小，序列长度越长，计算成本越高（注意力机制是平方复杂度）。
 
-⸻
 
 CNN 基线模型：
 
@@ -422,9 +420,7 @@ CNN 基线模型：
 - 使用 CNN 特征图（feature maps）作为 Transformer 的输入。
 - Patch size 是 1×1，相当于把 feature map 每个像素都看成一个 patch。
 
-⸻
-
-🛠️ 三、Training & Fine-tuning（训练与微调）
+**三、Training & Fine-tuning**
 
 所有模型（包括 ResNet 和 ViT）都使用 Adam 优化器 进行预训练：
 
@@ -437,21 +433,305 @@ CNN 基线模型：
 
 - batch size = 512
 - ImageNet 微调：
-- ViT-L/16 用 batch size 512
-- ViT-H/14 用 batch size 518
+  - ViT-L/16 用 batch size 512
+  - ViT-H/14 用 batch size 518
 - 使用 Polyak Averaging 提升效果（Ramachandran et al., 2019）
 
-⸻
 
-🎯 四、Metrics（评估指标）
+**四、Metrics（评估指标）**
 
 作者主要评估两种设置下的准确率：
 
-	1.	Fine-tuning accuracy：在下游任务上微调后的准确率
+1. Fine-tuning accuracy：在下游任务上微调后的准确率
 	2.	Few-shot accuracy：不微调，直接用预训练模型提取的表示去做分类
 
 Few-shot 的方法是：
 
 - 使用正则化的最小二乘回归，从训练样本的表示映射到类别标签（如 {-1, 1}^K）
 - 这种设置可以闭式求解，快速评估表示能力
+
+## 4.2 COMPARISON TO STATE OF THE ART
+
+| Dataset              | Ours-JFT (ViT-H/14) | Ours-JFT (ViT-L/16) | Ours-I21k (ViT-L/16) | BiT-L (ResNet152x4) | Noisy Student (EfficientNet-L2) |
+|----------------------|---------------------|----------------------|----------------------|----------------------|----------------------------------|
+| ImageNet             | **88.55 ± 0.04**    | 87.76 ± 0.03         | 85.30 ± 0.02         | 87.54 ± 0.02         | 88.4 / **88.5***                |
+| ImageNet ReaL        | **90.72 ± 0.05**    | 90.54 ± 0.05         | 88.62 ± 0.05         | 90.54                | 90.55                            |
+| CIFAR-10             | **99.50 ± 0.06**    | 99.42 ± 0.03         | 99.15 ± 0.03         | 99.37 ± 0.06         | —                                |
+| CIFAR-100            | **94.55 ± 0.04**    | 93.90 ± 0.05         | 93.25 ± 0.05         | 93.51 ± 0.08         | —                                |
+| Oxford-IIIT Pets     | **97.56 ± 0.03**    | 97.32 ± 0.11         | 94.67 ± 0.15         | 96.62 ± 0.23         | —                                |
+| Oxford Flowers-102   | 99.68 ± 0.02        | **99.74 ± 0.01**     | 99.61 ± 0.02         | 99.63 ± 0.03         | —                                |
+| VTAB (19 tasks)      | **77.63 ± 0.23**    | 76.28 ± 0.46         | 72.72 ± 0.21         | 76.29 ± 1.70         | —                                |
+| **TPUv3-core-days**  | 2.5k                | 0.68k                | 0.23k                | 9.9k                 | 12.3k                             |
+
+**Table 1**结论：
+1. ViT 模型（特别是 ViT-H/14）在所有主流图像任务上都达到了 SOTA。
+2. 预训练使用 JFT-300M 的 ViT 性能最强，但即使是 ImageNet-21k（公开数据）预训练的 ViT-L/16 也非常强（成本更低）。
+3. ViT 比 ResNet、EfficientNet 更节省计算资源，训练效率更高。
+
+![ViT_Figure_2](../images/ViT_Figure_2.png)      
+
+Figure 2展示了 VTAB（Visual Task Adaptation Benchmark） 中不同模型在三类任务上的性能表现对比。作者借此强调 ViT 在泛化能力方面的优势，特别是在多样化下游任务上。
+
+这一段主要内容就在于Table 1和Figure 2中，总结一下就是：
+- 在主流任务上领先SOTA
+- 在性能提升的同时使用了更少的计算资源
+- 即使不使用超大数据，ViT也能取得很好的效果，具有实际可落地性
+- 尤其在结构化任务（如VTAB-Structured）中表现优异，优于传统CNN
+
+## 4.3 PRE-TRAINING DATA REQUIREMENTS
+
+![ViT_Figure_3](../images/ViT_Figure_3.png)  
+
+> 最重要的一张图    
+
+**Figure 3：在 ImageNet 上迁移性能 vs 预训练数据集**       
+- 横轴是预训练数据集
+- 纵轴是在 ImageNet 上微调后的 Top-1 准确率
+- 曲线代表不同模型
+
+可以观察到：
+1. 在小数据集（ImageNet-21k）上，ResNet（BiT）表现更好：
+    - ViT 起步时不如 BiT，尤其是大模型（如 ViT-H/14）在小数据下训练不足，性能不佳。
+2. 在大数据集（JFT-300M）上，ViT 逆转，全面超过 BiT：
+    - ViT-L/16、ViT-H/14 都能击败 BiT-R152x4
+    - 模型越大、数据越多，ViT 增益越明显
+3.	ViT 的优势随着数据量变大而增强。
+
+结论：ViT 在大数据上训练时性能显著提升，尤其适合高资源场景。
+
+![ViT_Figure_4](../images/ViT_Figure_4.png)  
+
+Figure 4：Few-shot 表征能力 vs 预训练样本数
+- 横轴是预训练样本数量（从10M到300M）
+- 纵轴是 ImageNet 上的 linear 5-shot accuracy（固定模型，仅用5个样本/类训练线性分类器）
+
+可以观察到：
+1. 小数据时 ResNet 表现更好（起点更高），但增长缓慢，很快饱和。
+2. ViT 初期表现较弱，但随着数据量增大，其性能持续提升，最终超越 ResNet。
+3. ViT-b 是 ViT-B 的瘦版（hidden dim 减半），表现略差。
+
+结论：
+- ViT 的表示能力在小样本学习中同样有效，但需要足够大的预训练数据。
+- 相比之下，CNN 的 inductive bias 使其小数据时效果好，但增长上限低。
+
+本段主要回答了“ViT 缺乏 CNN 的视觉归纳偏置（如局部性和平移不变性），那么它是否更依赖大数据集才能有效学习？如果数据少，会不会表现很差？”这个问题：
+- ViT确实依赖更大的数据集 
+- 数据较少的时候表现确实会略差，但是很有潜力
+
+
+## 4.4 SCALING STUDY
+
+本段重点在于系统地评估不同架构（Transformer、ResNet、Hybrid）在计算量相同条件下的性能表现和可扩展性趋势。
+
+实验背景：控制变量的扩展性测试
+
+- 数据固定为 JFT-300M，这样可以排除数据大小的影响，只考察 计算开销 vs 表现。
+- 对比对象包括：
+  - 7 个 ResNet 变体：从 R50 到 R200（浅 → 深），训练周期为 7 或 14 个 epoch。
+  - 6 个 Vision Transformer（ViT-B/32 到 ViT-H/14），训练 7 或 14 个 epoch。
+  - 5 个 Hybrid 模型：如 R50+ViT-L/16（使用 ResNet 提特征，ViT 编码），训练 7 或 14 个 epoch。
+- Hybrid 名称后缀（如 B/16）代表的是 ResNet 特征图的降采样比例，不是 patch size。
+
+![ViT_Figure_5](../images/ViT_Figure_5.png)       
+
+ Figure 5：准确率 vs 训练计算量（exaFLOPs）
+
+- 左：多个任务的平均准确率（Average-5）
+- 右：ImageNet 单一任务准确率
+- 横轴：预训练计算量（exaFLOPs）
+- 纵轴：fine-tune 后的准确率
+- 不同形状表示不同模型：
+  - 蓝圆：ViT
+  - 灰方：ResNet (BiT)
+  - 橙十字：Hybrid（CNN特征+Transformer）
+
+可以观察到：
+1. 在同等计算预算下，ViT 往往优于 ResNet（蓝点普遍高于灰点）
+2. Hybrid 在小规模模型中略优于纯 Transformer，但随着模型变大，这种优势消失     
+  - 因为 ViT 能更好地利用大计算量和数据。
+
+结论：
+- ViT 是更高性价比的架构：同样算力下准确率更高。
+- 小模型时，Hybrid 架构（CNN + Transformer）略有优势。
+- 大模型下，纯 Transformer 最强，且 ViT 还未看到瓶颈。
+
+## 4.5 INSPECTING VISION TRANSFORMER
+
+![ViT_Figure_6](../images/ViT_Figure_6.png)    
+
+Figure 6 ：注意力图示例
+- 展示了不同图像中，ViT 最后输出 token（[CLS]）关注的区域：
+  - 狗图中聚焦在狗的脸上
+  - 飞机图中聚焦在机身
+
+结论：ViT 自动学会关注图像中对分类最有用的部分，效果接近甚至优于 CAM 等经典方法。
+
+![ViT_Figure_7](../images/ViT_Figure_7.png)    
+
+Figure 7 展现了 Vision Transformer 在表征学习中的三个关键机制：
+1. 左图：线性投影权重的主成分可视化
+
+含义：
+- 显示的是 ViT-L/32 的 patch 嵌入层（linear embedding）的前28个主成分（PCA 可视化）。
+- 这些“filters” 是 ViT 将图像 patch 映射为 token 表示的“投影基底”。
+
+解读：
+- 图像中可见条纹、边缘、颜色对比、纹理方向等特征，这些都非常类似卷积神经网络中的卷积核。
+- 表明：ViT 的输入投影层自动学会了局部结构的感知方式，即便它不是 CNN。
+- 所以 ViT 虽无 inductive bias，也能学到低级视觉特征，如边缘、频率等。
+
+结论：ViT 的 patch embedding 层自发学习出了类似 CNN 卷积核的功能基。
+
+2. 中图：位置编码之间的相似度矩阵
+
+含义：
+- 可视化的是 ViT-L/32 的 position embedding 相似度（cosine similarity）。
+- 每个 tile 表示某个 patch 的位置编码与其他所有 patch 的余弦相似度。
+
+解读：
+- 相邻 patch 的位置编码相似性高（颜色偏绿色），说明模型确实学习了 2D 空间拓扑结构。
+- 行列结构清晰：在同一行/列的 patch 更相似，反映出模型对图像网格结构的感知。
+- 右上角、左下角处颜色变化大 → 距离远，编码相似度低。
+
+结论：ViT 不依赖手工构造的位置编码，也能学习出有意义的二维结构表示。
+
+3. 右图：注意力范围随层数的变化
+
+横轴：网络深度（第几层 Transformer）
+
+纵轴：注意力“平均距离”（mean attention distance，单位像素）
+- 每个彩色点表示一个 attention head 在某一层的平均注意力作用距离。
+
+解读：
+1. 浅层的 head：注意力范围小，仅关注邻近 patch，类似 CNN 的感受野。
+2. 深层的 head：注意力范围广，能跨越整张图像做全局信息整合。
+3. 不同 head 的注意力范围差异大：有的负责局部，有的负责全局，形成协作机制。
+4. 这些变化不是人为设定，而是模型自主学习出来的结构特性。
+
+结论：ViT 自动组织了注意力机制来在不同层实现“从局部到全局”的感知增强。
+
+总结：ViT 虽不具备 CNN 的硬编码归纳偏置，但它能够通过学习机制逐层构建感知基础（类似卷积核）、空间结构（位置编码）、以及多尺度注意力（不同层 attention 距离），最终实现强大的全局感知与图像理解能力。
+
+本段重点在于通过可视化和分析 ViT 的中间表示和注意力机制，来理解它是如何处理图像、编码空间结构、聚焦重要区域的。
+
+**一、Patch Projection & Embedding 的行为理解**
+
+1. ViT 的第一层线性投影（linear projection）：
+  - 把展平的 patch 映射到 D 维表示空间。
+  - Figure 7（左图）显示了该投影矩阵的主成分（PCA 可视化），结果类似于：
+    - 图像局部区域的低维基函数（basis functions）
+    - 类似于卷积核的作用，但是“自动学习的基”
+2. 可解释性：
+  - 这些 embedding filters 学到的是局部纹理的结构性表示，解释了 ViT 能感知细节结构。
+
+
+**二、Position Embedding 的空间编码能力**
+
+1.	学习式位置编码 learnable positional embedding 的结构性：
+- Figure 7（中图）显示：
+  - 越相近的 patch，其位置编码越相似
+  - 行/列方向上编码结构明显，表明模型自动学习了 2D 拓扑关系
+2.	额外观察：
+- 对于更大的 patch 网格，位置编码甚至形成了类正弦波（sinusoidal）结构，模仿 Transformer 原始的编码方式
+3.	结论：
+- ViT 自主学习到了图像的二维空间结构
+- 这也解释了为什么手工设计的 2D-aware 位置编码并没有显著提升（参考附录 D.4）
+
+**三、Attention 距离分析 – 类似感受野**
+
+1. 作者计算了 attention 的“平均空间距离”——即 attention 的接收范围（receptive field）：
+- 在 CNN 中，感受野是固定的
+- 在 ViT 中，不同 attention head 可以聚焦不同范围
+2.	结果发现（Figure 7 右图）：
+- 某些 head 从最低层就已经关注全图（全局感受野）
+- 其他 head 更局部，仅关注近邻，类似 CNN 的 early conv 层
+3.	在 Hybrid 模型中（ResNet + ViT）：
+- 注意力范围更局限，模型倾向于使用 CNN 提供的空间结构信息，而非自主整合
+4.	总体结论：
+- ViT 模型确实会利用其全局 self-attention 能力
+- 随着网络深度增加，注意力范围进一步扩大
+- 模型最终倾向于关注对分类最重要的区域（Figure 6 举例）
+
+## 4.6 SELF-SUPERVISION
+
+本段是对 ViT 自监督能力的初步验证。
+
+- 在自然语言处理（NLP）领域中，Transformer 的成功不仅仅归功于其可扩展性（scalability）和架构本身。
+- 更重要的一个因素是：大规模的自监督预训练策略，例如：
+  - BERT 使用 masked language modeling（MLM）
+  - GPT 使用 language modeling（LM）
+  - 引用的是 Devlin et al., 2019；Radford et al., 2018。
+
+作者借鉴了这一点，尝试通过 ViT 做图像领域的自监督学习。
+
+**一、实验设计：模仿 BERT 做图像自监督**
+
+- 作者设计了类似 NLP 的 mask 预测任务，叫做 Masked Patch Prediction：
+  - 随机 mask 掉图像中的一部分 patch
+  - 模型要通过上下文恢复这些 patch 表示
+  - 类似于 BERT 的 MLM
+
+> 这是典型的图像自监督训练方法，不使用标签，仅靠输入本身进行学习   
+
+**二、 实验结果：ViT-B/16 自监督表现**
+
+| 训练方式                    | Top-1 Accuracy (ImageNet)      |
+|-----------------------------|--------------------------------|
+| 从零训练（scratch）        | 约 77.9%                       |
+| 自监督预训练 + 微调        | **79.9%**                   |
+| 有监督预训练 + 微调        | **约 84% （高出 4%）**       |
+
+- ViT-B/16 使用自监督预训练后提升了 2 个百分点，相较从头训练明显更好。
+- 但相比有监督预训练，还差约 4%。
+
+实验表明自监督对 ViT 有益，但当时的策略还没有达到 supervised 的水平。
+
+**三、补充说明 & 后续方向**
+
+- 本文只做了 masked patch 预测。
+- 对比学习（contrastive learning） 还没做，如：
+  - MoCo、SimCLR（He et al., 2020）
+  - BYOL、SwAV（Bachman et al., Hénaff et al., Chen et al. 等）
+
+作者留出进一步使用 contrastive learning 的研究空间。
+
+# 5 CONCLUSION
+
+本段总结了全文的主要发现和研究贡献，并指出了后续研究的几个关键挑战方向。
+
+**一、研究的核心成果总结**
+
+- ViT 是第一个将 NLP 中标准 Transformer 架构几乎原样应用于图像分类的模型。
+- 与以往视觉领域中加入大量 CNN 风格 inductive bias 的 Transformer 不同，ViT：
+  - 唯一的视觉特化步骤是将图像分成 patches
+  - 之后就使用和 NLP 中一样的 Transformer 编码器
+
+实验发现：
+- 尽管结构极其简单，只要有足够的大数据进行预训练，ViT 就能达到甚至超过现有 SOTA 模型。
+- 预训练效率高、训练成本相对较低。
+
+ViT 证明了“纯 Transformer + 大数据”在视觉任务中是可行的、有效的。
+
+**二、当前局限 & 未来挑战** 
+
+While these initial results are encouraging, many challenges remain…
+
+**挑战 1：迁移到更复杂的计算机视觉任务**
+- 当前论文主要聚焦于图像分类任务。
+- 更具挑战性的任务如：
+  - 目标检测
+  - 语义分割
+- ViT 在这类结构化输出任务中的潜力还未验证。
+- 文中提到 Carion et al. (2020)（即 DETR）已初步展示 Transformer 在目标检测上的潜力。
+
+**挑战 2：更好的自监督训练方法**
+- ViT 的早期自监督实验表明确有潜力（见 4.6 小节），但目前与监督训练还有 4% 精度差距
+- 对比学习（contrastive learning）、掩码建模（masked modeling）等都值得深入探索。
+
+**挑战 3：进一步扩展模型（scaling）**
+- 当前实验主要使用 ViT-B, ViT-L, ViT-H，最大也只到 H/14。
+- 模型并未出现性能饱和现象，还有更多扩展空间：
+  - 更深、更宽
+  - 更高分辨率
+  - 更大训练集（如 future JFT++）
 
