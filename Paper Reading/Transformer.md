@@ -363,11 +363,7 @@ $$
 ### 3. 计算 Q, K, V
 
 
-\[
-Q = X \cdot W^Q, \quad
-K = X \cdot W^K, \quad
-V = X \cdot W^V
-\]
+$$Q=X\cdot W^Q,\quad K=X\cdot W^K,\quad V=X\cdot W^V$$
 
 
 #### 计算 Q:
