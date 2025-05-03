@@ -226,7 +226,7 @@ $$
 
 
 $$
-\textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}
+\textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}       
 $$
 
 
@@ -236,7 +236,7 @@ $$
 
 
 $$
-\textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}
+\textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}         
 $$
 
 
@@ -246,7 +246,7 @@ $$
 
 
 $$
-\textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}
+\textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}         
 $$
 
 
