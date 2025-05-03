@@ -224,13 +224,13 @@ $$
 - 查询权重矩阵：     
 
 $$
-\mathbf{W}_Q\in\mathbb{R}^{d_{model}\times d_k}
+\mathbf{W}_Q\in\mathbb{R}^{d_{\mathrm{model}}\times d_k}
 $$
 
 - 键权重矩阵：       
 
 $$
-\mathbf{W}_K\in\mathbb{R}^{d_{model}\times d_k}
+\mathbf{W}_K\in\mathbb{R}^{d_{\mathrm{model}}\times d_k}
 $$
 
 - 值权重矩阵：         
