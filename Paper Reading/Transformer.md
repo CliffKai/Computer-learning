@@ -234,8 +234,14 @@ $$
 $$
 
 - 值权重矩阵：         
-hahah
-haha
+
+$$
+\textbf{Q} = \textbf{X} \cdot \textbf{W}_Q \in \mathbb{R}^{n \times d_k}
+$$
+
+$$
+\textbf{K}^\top \in \mathbb{R}^{d_k \times n}
+$$
 
 $$
 \mathbf{W}_V\in\mathbb{R}^{d_{\mathrm{model}}\times d_v}
