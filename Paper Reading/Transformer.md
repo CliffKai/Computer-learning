@@ -221,25 +221,25 @@ $$
 
 注意力的权重矩阵定义如下：
 
-- 查询权重矩阵：
+- 查询权重矩阵：     
 
 $$
 \textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}
 $$
 
-- 键权重矩阵：
+- 键权重矩阵：       
 
 $$
 \textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}
 $$
 
-- 值权重矩阵：
+- 值权重矩阵：         
 
 $$
 \textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}
 $$
 
-> 通常：$d_k = d_v = d_{\text{model}} / h$，其中 $h$ 是多头数量（单头时就是 $d_k = d_v = d_{\text{model}}$）
+> 通常： $d_k = d_v = d_{\text{model}} / h$ ，其中 $h$ 是多头数量（单头时就是 $d_k = d_v = d_{\text{model}}$ ）
 
 ### 3. 映射后得到的矩阵维度
 
