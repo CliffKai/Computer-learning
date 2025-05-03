@@ -117,6 +117,7 @@ Decoder 同样由 N 层组成：
 A，B，C
 
 输入矩阵：
+
 $$
 \textbf{X} = 
 \begin{bmatrix}
@@ -130,6 +131,7 @@ $$
 Wq, Wk, Wv
 
 分别映射得到：
+
 $$
 \textbf{Q} = 
 \begin{bmatrix}
@@ -161,6 +163,7 @@ V^C
 $$
 
 对 K 做转置：
+
 $$
 \textbf{K}^\top = 
 \begin{bmatrix}
@@ -169,6 +172,7 @@ K^A & K^B & K^C
 $$
 
 计算 QK^T，得到注意力得分矩阵：
+
 $$
 \textbf{Q} \cdot \textbf{K}^\top =
 \begin{bmatrix}
@@ -179,6 +183,7 @@ Q^C \cdot K^A & Q^C \cdot K^B & Q^C \cdot K^C
 $$
 
 缩放：
+
 $$
 \text{Attention Scores (scaled)} = 
 \frac{\textbf{Q} \cdot \textbf{K}^\top}{\sqrt{d_k}}
@@ -191,6 +196,7 @@ $$
 
 
 最终输出：
+
 $$
 \text{Output} = \text{Attention Weights} \cdot \textbf{V}
 $$
@@ -215,16 +221,19 @@ $$
 注意力的权重矩阵定义如下：
 
 - 查询权重矩阵：
+
   $$
   \textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}
   $$
 
 - 键权重矩阵：
+
   $$
   \textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}
   $$
 
 - 值权重矩阵：
+
   $$
   \textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}
   $$
@@ -234,16 +243,19 @@ $$
 ### 3. 映射后得到的矩阵维度
 
 - 查询矩阵：
+
   $$
   \textbf{Q} = \textbf{X} \cdot \textbf{W}_Q \in \mathbb{R}^{n \times d_k}
   $$
 
 - 键矩阵：
+
   $$
   \textbf{K} = \textbf{X} \cdot \textbf{W}_K \in \mathbb{R}^{n \times d_k}
   $$
 
 - 值矩阵：
+
   $$
   \textbf{V} = \textbf{X} \cdot \textbf{W}_V \in \mathbb{R}^{n \times d_v}
   $$
@@ -251,21 +263,25 @@ $$
 ### 4. 注意力得分与输出维度
 
 - 键矩阵转置：
+
   $$
   \textbf{K}^\top \in \mathbb{R}^{d_k \times n}
   $$
 
 - 注意力得分矩阵：
+
   $$
   \textbf{Q} \cdot \textbf{K}^\top \in \mathbb{R}^{n \times n}
   $$
 
 - softmax 后的注意力权重矩阵：
+
   $$
   \text{Attention Weights} \in \mathbb{R}^{n \times n}
   $$
 
 - 输出结果矩阵（经过注意力加权）：
+
   $$
   \text{Output} = \text{Attention Weights} \cdot \textbf{V} \in \mathbb{R}^{n \times d_v}
   $$
@@ -275,6 +291,7 @@ $$
 - 输入序列中的每个 token 长度必须为 $d_{\text{model}}$
 - 权重矩阵的输入维度必须匹配 $d_{\text{model}}$，输出维度决定注意力子空间 $d_k$ 和 $d_v$
 - 输出的 shape 始终是：
+
   $$
   \boxed{\text{Output} \in \mathbb{R}^{n \times d_v}}
   $$
@@ -493,6 +510,7 @@ $$
 A，B，C
 
 输入矩阵：
+
 $$
 \textbf{X} =
 \begin{bmatrix}
@@ -503,40 +521,48 @@ C
 $$
 
 对于每一个头（例如共 $h$ 个头），我们分别定义一组权重矩阵：
+
 $$
 W_Q^{(i)},\quad W_K^{(i)},\quad W_V^{(i)} \quad \text{for } i = 1, 2, …, h
 $$
 
 第 $i$ 个头的计算
 	1.	线性映射：
+
 $$
 \textbf{Q}^{(i)} = \textbf{X} \cdot \textbf{W}_Q^{(i)}, \quad
 \textbf{K}^{(i)} = \textbf{X} \cdot \textbf{W}_K^{(i)}, \quad
 \textbf{V}^{(i)} = \textbf{X} \cdot \textbf{W}_V^{(i)}
 $$
+
 	2.	计算注意力得分矩阵：
+
 $$
 \text{Scores}^{(i)} = \frac{\textbf{Q}^{(i)} \cdot \left(\textbf{K}^{(i)}\right)^\top}{\sqrt{d_k}}
 $$
+
 	3.	归一化注意力权重（Softmax）：
+
 $$
 \text{Attention}^{(i)} = \text{softmax}\left(\text{Scores}^{(i)}\right)
 $$
+
 	4.	计算该头的输出：
+
 $$
 \text{Head}^{(i)} = \text{Attention}^{(i)} \cdot \textbf{V}^{(i)}
 $$
 
-⸻
-
 拼接多个头并线性变换
 
 将所有头的输出拼接在一起：
+
 $$
 \text{MultiHead} = \text{Concat} \left( \text{Head}^{(1)}, \text{Head}^{(2)}, …, \text{Head}^{(h)} \right)
 $$
 
 使用一个最终的线性变换矩阵 $W_O$：
+
 $$
 \text{Output} = \text{MultiHead} \cdot W_O
 $$
