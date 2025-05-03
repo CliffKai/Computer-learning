@@ -190,6 +190,7 @@ $$
 $$
 
 softmax 归一化（行方向）：
+
 $$
 \text{Attention Weights} = \text{softmax} \left( \frac{\textbf{Q} \cdot \textbf{K}^\top}{\sqrt{d_k}} \right)
 $$
@@ -222,21 +223,21 @@ $$
 
 - 查询权重矩阵：
 
-  $$
-  \textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}
-  $$
+$$
+\textbf{W}_Q \in \mathbb{R}^{d_{\text{model}} \times d_k}
+$$
 
 - 键权重矩阵：
 
-  $$
-  \textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}
-  $$
+$$
+\textbf{W}_K \in \mathbb{R}^{d_{\text{model}} \times d_k}
+$$
 
 - 值权重矩阵：
 
-  $$
-  \textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}
-  $$
+$$
+\textbf{W}_V \in \mathbb{R}^{d_{\text{model}} \times d_v}
+$$
 
 > 通常：$d_k = d_v = d_{\text{model}} / h$，其中 $h$ 是多头数量（单头时就是 $d_k = d_v = d_{\text{model}}$）
 
@@ -244,47 +245,47 @@ $$
 
 - 查询矩阵：
 
-  $$
-  \textbf{Q} = \textbf{X} \cdot \textbf{W}_Q \in \mathbb{R}^{n \times d_k}
-  $$
+$$
+\textbf{Q} = \textbf{X} \cdot \textbf{W}_Q \in \mathbb{R}^{n \times d_k}
+$$
 
 - 键矩阵：
 
-  $$
-  \textbf{K} = \textbf{X} \cdot \textbf{W}_K \in \mathbb{R}^{n \times d_k}
-  $$
+$$
+\textbf{K} = \textbf{X} \cdot \textbf{W}_K \in \mathbb{R}^{n \times d_k}
+$$
 
 - 值矩阵：
 
-  $$
-  \textbf{V} = \textbf{X} \cdot \textbf{W}_V \in \mathbb{R}^{n \times d_v}
-  $$
+$$
+\textbf{V} = \textbf{X} \cdot \textbf{W}_V \in \mathbb{R}^{n \times d_v}
+$$
 
 ### 4. 注意力得分与输出维度
 
 - 键矩阵转置：
 
-  $$
-  \textbf{K}^\top \in \mathbb{R}^{d_k \times n}
-  $$
+$$
+\textbf{K}^\top \in \mathbb{R}^{d_k \times n}
+$$
 
 - 注意力得分矩阵：
 
-  $$
-  \textbf{Q} \cdot \textbf{K}^\top \in \mathbb{R}^{n \times n}
-  $$
+$$
+\textbf{Q} \cdot \textbf{K}^\top \in \mathbb{R}^{n \times n}
+$$
 
 - softmax 后的注意力权重矩阵：
 
-  $$
-  \text{Attention Weights} \in \mathbb{R}^{n \times n}
-  $$
+$$
+\text{Attention Weights} \in \mathbb{R}^{n \times n}
+$$
 
 - 输出结果矩阵（经过注意力加权）：
 
-  $$
-  \text{Output} = \text{Attention Weights} \cdot \textbf{V} \in \mathbb{R}^{n \times d_v}
-  $$
+$$
+\text{Output} = \text{Attention Weights} \cdot \textbf{V} \in \mathbb{R}^{n \times d_v}
+$$
 
 ### 总结注意点
 
@@ -292,9 +293,9 @@ $$
 - 权重矩阵的输入维度必须匹配 $d_{\text{model}}$，输出维度决定注意力子空间 $d_k$ 和 $d_v$
 - 输出的 shape 始终是：
 
-  $$
-  \boxed{\text{Output} \in \mathbb{R}^{n \times d_v}}
-  $$
+$$
+\boxed{\text{Output} \in \mathbb{R}^{n \times d_v}}
+$$
 
 ## 举个例子
 
