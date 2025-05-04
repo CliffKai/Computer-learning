@@ -488,15 +488,11 @@ $$\mathrm{Score}=\frac{QK^{T}}{\sqrt{3}}\approx
 
 对上面每一行做 softmax，得到注意力分布：
 
-\[
-\text{AttentionWeight}_{i,j} = \frac{e^{\text{Score}_{i,j}}}{\sum_k e^{\text{Score}_{i,k}}}
-\]
+$$\text{AttentionWeight}_{i,j}=\frac{e^{\mathrm{Score}_{i,j}}}{\sum_ke^{\mathrm{Score}_{i,k}}}$$
 
 得到注意力矩阵 $A$，再计算最终输出：
 
-\[
-\text{Output} = A \cdot V
-\]
+$$\mathrm{Output}=A\cdot V$$
 
 
 最后的计算结果可以看Code下Attention.py代码
