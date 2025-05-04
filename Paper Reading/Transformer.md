@@ -579,6 +579,7 @@ $$
 **为什么多头注意力机制需要 $W_O$？**
 
 对于多头注意力机制，不同头的输出会进行拼接：
+
 $$
 \text{MultiHead} = \text{Concat} \left( \text{Head}^{(1)}, \text{Head}^{(2)}, …, \text{Head}^{(h)} \right)
 $$
@@ -627,7 +628,7 @@ $$
 \mathbf{W}V^{(i)} \in \mathbb{R}^{d{\text{model}} \times d_v}
 $$
 
-通常：$d_k = d_v = d_{\text{model}} / h$，其中 $h$ 是注意力头的数量。
+通常： $d_k = d_v = d_{\text{model}} / h$ ，其中 $h$ 是注意力头的数量。
 
 ### 3. 每个头的计算过程与维度
 
