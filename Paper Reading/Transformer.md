@@ -503,8 +503,6 @@ $$\mathrm{Score}=\frac{QK^{T}}{\sqrt{3}}\approx
 
 ## 多头计算过程
 
-多头计算过程
-
 给定三个输入向量：
 A，B，C
 
@@ -526,7 +524,8 @@ W_Q^{(i)},\quad W_K^{(i)},\quad W_V^{(i)} \quad \text{for } i = 1, 2, …, h
 $$
 
 第 $i$ 个头的计算
-	1.	线性映射：
+
+1.	线性映射：
 
 $$
 \textbf{Q}^{(i)} = \textbf{X} \cdot \textbf{W}_Q^{(i)}, \quad
@@ -534,19 +533,19 @@ $$
 \textbf{V}^{(i)} = \textbf{X} \cdot \textbf{W}_V^{(i)}
 $$
 
-	2.	计算注意力得分矩阵：
+2.	计算注意力得分矩阵：
 
 $$
 \text{Scores}^{(i)} = \frac{\textbf{Q}^{(i)} \cdot \left(\textbf{K}^{(i)}\right)^\top}{\sqrt{d_k}}
 $$
 
-	3.	归一化注意力权重（Softmax）：
+3.	归一化注意力权重（Softmax）：
 
 $$
 \text{Attention}^{(i)} = \text{softmax}\left(\text{Scores}^{(i)}\right)
 $$
 
-	4.	计算该头的输出：
+4.	计算该头的输出：
 
 $$
 \text{Head}^{(i)} = \text{Attention}^{(i)} \cdot \textbf{V}^{(i)}
@@ -566,3 +565,132 @@ $$
 \text{Output} = \text{MultiHead} \cdot W_O
 $$
 
+
+## 补充
+
+在单头自注意力机制中，通常不会使用最终的线性变换矩阵 $W_O$，即输出直接由注意力权重加权后的值给出：
+
+$$
+\text{Output} = \text{Attention Weights} \cdot \textbf{V}
+$$
+
+这种情况下，$W_O$ 并不是必要的。
+
+**为什么多头注意力机制需要 $W_O$？**
+
+对于多头注意力机制，不同头的输出会进行拼接：
+$$
+\text{MultiHead} = \text{Concat} \left( \text{Head}^{(1)}, \text{Head}^{(2)}, …, \text{Head}^{(h)} \right)
+$$
+
+拼接后的维度通常为 $h \cdot d_v$，为了将其映射回模型的原始维度 $d_{\text{model}}$，需要使用一个线性变换矩阵 $W_O \in \mathbb{R}^{(h \cdot d_v) \times d_{\text{model}}}$：
+
+$$
+\text{Output} = \text{MultiHead} \cdot W_O
+$$
+
+> 虽然单头注意力理论上也可以引入 $W_O$ 来提升表达能力或保持接口一致性，但在标准实现或论文中一般不会这么做。
+
+
+
+## 多头注意力机制计算格式
+
+### 1. 输入格式
+
+假设输入序列有 $n$ 个 token（例如 A、B、C），每个 token 是长度为 $d_{\text{model}}$ 的向量：
+
+$$
+\textbf{X} \in \mathbb{R}^{n \times d_{\text{model}}}
+$$
+
+其中：
+- $n$ 是序列长度；
+- $d_{\text{model}}$ 是每个 token 的特征维度。
+
+
+### 2. 权重矩阵维度（每个头）
+
+对于每一个头 $i$，定义一组独立的线性投影矩阵：
+- 查询权重矩阵：
+
+$$
+\mathbf{W}Q^{(i)} \in \mathbb{R}^{d{\text{model}} \times d_k}
+$$
+- 键权重矩阵：
+
+$$
+\mathbf{W}K^{(i)} \in \mathbb{R}^{d{\text{model}} \times d_k}
+$$
+- 值权重矩阵：
+
+$$
+\mathbf{W}V^{(i)} \in \mathbb{R}^{d{\text{model}} \times d_v}
+$$
+
+通常：$d_k = d_v = d_{\text{model}} / h$，其中 $h$ 是注意力头的数量。
+
+### 3. 每个头的计算过程与维度
+
+对于第 $i$ 个头：
+- 查询矩阵：
+
+$$
+\textbf{Q}^{(i)} = \textbf{X} \cdot \mathbf{W}_Q^{(i)} \in \mathbb{R}^{n \times d_k}
+$$
+- 键矩阵：
+
+$$
+\textbf{K}^{(i)} = \textbf{X} \cdot \mathbf{W}_K^{(i)} \in \mathbb{R}^{n \times d_k}
+$$
+- 值矩阵：
+
+$$
+\textbf{V}^{(i)} = \textbf{X} \cdot \mathbf{W}_V^{(i)} \in \mathbb{R}^{n \times d_v}
+$$
+- 注意力得分矩阵：
+
+$$
+\textbf{Q}^{(i)} \cdot \left(\textbf{K}^{(i)}\right)^\top \in \mathbb{R}^{n \times n}
+$$
+- softmax 后的注意力权重矩阵：
+
+$$
+\text{Attention}^{(i)} \in \mathbb{R}^{n \times n}
+$$
+- 每个头的输出：
+
+$$
+\text{Head}^{(i)} = \text{Attention}^{(i)} \cdot \textbf{V}^{(i)} \in \mathbb{R}^{n \times d_v}
+$$
+
+
+### 4. 拼接多个头并进行线性变换
+
+将所有 $h$ 个头的输出拼接在最后一维：
+
+$$
+\text{MultiHead} = \text{Concat}(\text{Head}^{(1)}, \dots, \text{Head}^{(h)}) \in \mathbb{R}^{n \times (h \cdot d_v)}
+$$
+
+使用一个线性变换矩阵 $W_O$ 将拼接后的结果映射回 $d_{\text{model}}$ 维空间：
+
+$$
+\mathbf{W}_O \in \mathbb{R}^{(h \cdot d_v) \times d{\text{model}}}
+$$
+
+最终输出为：
+
+$$
+\text{Output} = \text{MultiHead} \cdot \mathbf{W}_O \in \mathbb{R}^{n \times d{\text{model}}}
+$$
+
+
+### 总结注意点
+
+- 每个头的输出维度是 $n \times d_v$，拼接后为 $n \times (h \cdot d_v)$；
+- 输出经过 $W_O$ 线性变换后维度回到 $n \times d_{\text{model}}$；
+- 多头注意力机制的输出维度为：
+
+$$
+\boxed{\text{Output} \in \mathbb{R}^{n \times d_{\text{model}}}}
+$$
