@@ -8,6 +8,7 @@ Pathways to Computer Science learning(Maybe DL).
     - BERT
     - ViT
     - Transformer
+    - MAE
 
 # 说明    
 
