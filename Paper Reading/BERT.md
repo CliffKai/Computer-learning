@@ -282,7 +282,7 @@ Figure 1：该图展示了整个 BERT 模型的预训练（Pre-training）与微
 - 左边：BERT 的 预训练阶段（Pre-training）
 - 右边：BERT 在不同任务上的 微调阶段（Fine-tuning）
 
-一、左侧：Pre-training（预训练）
+**一、左侧：Pre-training（预训练）**
 
 核心思想：
 - BERT 在大规模语料上通过两个任务来进行预训练：
@@ -314,7 +314,7 @@ Figure 1：该图展示了整个 BERT 模型的预训练（Pre-training）与微
 图中红色箭头 “NSP” 就是这个任务的输出。
 
 
-二、右侧：Fine-tuning（微调）
+**二、右侧：Fine-tuning（微调）**
 
 **核心思想**：在不同的下游任务中，在 BERT 的预训练模型基础上，加一个轻量的任务特定层（如分类器、指针等），然后对整个模型一起训练（微调）。
 
